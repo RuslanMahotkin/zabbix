@@ -3,7 +3,7 @@
 
 Основные принципы написания сценариев:
 - простота: небольшой объем кода;
-- единообразие: одинаковые подходы к получению. обработке и отправке на сервер статитики;
+- единообразие: одинаковые подходы к получению. обработке и отправке на сервер статистики;
 - штатные средства: использование идущих в дистрибутиве и устанавливаемых по умолчанию утилит(в основном);
 - данные типа траппер;
 - данные получаются одним запросом к сервису;
@@ -51,6 +51,7 @@
  chmod 2750 /etc/zabbix; chown -R .zabbix /etc/zabbix
  chmod 640 /etc/zabbix/zabbix_agentd.conf
 ```
+
 3. Разрещение портов в файерволе:
 ```
  # IP адрес сервера Zabbix
@@ -62,6 +63,7 @@
  /sbin/iptables -A OUTPUT -p tcp --dport 10051 -d $ZabbServIP -j ACCEPT
  /sbin/iptables -A INPUT  -p tcp --sport 10051 -s $ZabbServIP -j ACCEPT
 ```
+
 4. Настройка агента в файле /etc/zabbix/zabbix_agentd.conf:
 ```
  SourceIP		= IP.адрес.zabbix.агента
@@ -70,6 +72,7 @@
  ServerActive		= IP.адрес.zabbix.сервера
  Timeout		= >5
 ```
+
 5. Установка требуемых сценариев.
 
 
@@ -125,26 +128,28 @@ ExtendedStatus		On
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
-`UserParameter		= apache_status,/etc/zabbix/apache_stat.sh`
-
+```
+UserParameter		= apache_status,/etc/zabbix/apache_stat.sh
+```
 
 Перезапуск сервисов
-`service nginx reload; service httpd restart; service zabbix-agent restart`
+```
+service nginx reload; service httpd restart; service zabbix-agent restart
+```
 
-
------------------------------------------------------------
-Asterisk, шаблон mytemplate-asterisk-trap.xml
------------------------------------------------------------
+## Asterisk, шаблон mytemplate-asterisk-trap.xml
 
 Установить утилиту Netcat - пакет nc.
+
 В файле настройки модуля AMI и сценарии в подстроке
-
-'... Username: Пользователь_мониторинга\r\nSecret: Пароль_мониторинга\r\n ...'
-
+```
+... Username: Пользователь_мониторинга\r\nSecret: Пароль_мониторинга\r\n ...
+```
 установить свои значения 'Пользователь_мониторинга' и 'Пароль_мониторинга'.
 
 
-/etc/asterisk/manager.conf - настроить модуль AMI
+/etc/asterisk/manager.conf - настроить модуль AMI и задать пользователя
+```
 [general]
 enabled = yes
 bindaddr = 127.0.0.1
@@ -158,130 +163,143 @@ secret = Пароль_мониторинга
 deny=0.0.0.0/0.0.0.0
 permit=127.0.0.1/255.255.255.255
 write = command,reporting
+```
 
-
-# (Пере)Запустить модуль AMI
+Перезапустить модуль AMI
+```
 asterisk -rvvvvvv
  manager reload
+```
 
-
-# Сценарий отправки статистики сервера Asterisk на сервер Zabbix
+Сценарий отправки статистики сервера Asterisk на сервер Zabbix
+```
 chmod 750 /etc/zabbix/asterisk_stat.sh
 chown .zabbix /etc/zabbix/asterisk_stat.sh
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= asterisk_status,/etc/zabbix/asterisk_stat.sh
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
 
------------------------------------------------------------
-Elasticsearch, шаблон mytemplate-elasticsearch-trap.xml
------------------------------------------------------------
+## Elasticsearch, шаблон mytemplate-elasticsearch-trap.xml
 
-# Сценарий отправки статистики сервера Elasticsearch на сервер Zabbix
+Сценарий отправки статистики сервера Elasticsearch на сервер Zabbix
+```
 chmod 750 /etc/zabbix/{elasticsearch_stat.sh,JSON.sh}
 chown .zabbix /etc/zabbix/{elasticsearch_stat.sh,JSON.sh}
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= elasticsearch_status,/etc/zabbix/elasticsearch_stat.sh
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
+## IO - дисковый ввод/вывод, шаблон mytemplate-io-trap.xml
 
------------------------------------------------------------
-IO - дисковый ввод/вывод, шаблон mytemplate-io-trap.xml
------------------------------------------------------------
+Так как сценарий выполняет вызов `iostat` с 5 секундным замером, то параметр
+`Timeout` в `zabbix_agentd.conf` должен быть больше 5.
 
-Так как сценарий выполняет вызов iostat с 5 секундным замером, то параметр
-Timeout в zabbix_agentd.conf должен быть больше 5.
-
-Установить пакет sysstat (версии не ниже 9.0.4-27)
-# Удалить сбор статистики по cron
+Установить пакет `sysstat` (версии не ниже 9.0.4-27). Удалить сбор статистики по `cron`
+```
 rm -f /etc/cron.d/sysstat
+```
 
-
-# Сценарий отправки статистики дискового ввода-вывода на сервер Zabbix
+Сценарий отправки статистики дискового ввода-вывода на сервер Zabbix
+```
 chmod 750 /etc/zabbix/io_stat.sh
 chown .zabbix /etc/zabbix/io_stat.sh
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= iostat_status,/etc/zabbix/io_stat.sh
 UserParameter		= iostat.discovery_disks,/etc/zabbix/io_stat.sh disks
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
+## MongoDB, шаблон mytemplate-mongodb-trap.xml
 
------------------------------------------------------------
-MongoDB, шаблон mytemplate-mongodb-trap.xml
------------------------------------------------------------
-
-# Сценарий отправки статистики сервера MongoDB на сервер Zabbix
+Сценарий отправки статистики сервера MongoDB на сервер Zabbix
+```
 chmod 750 /etc/zabbix/{JSON.sh,mongodb_stat.sh}
 chown .zabbix /etc/zabbix/{JSON.sh,mongodb_stat.sh}
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= mongodb_status,/etc/zabbix/mongodb_stat.sh
 UserParameter		= mongodb.discovery_db,/etc/zabbix/mongodb_stat.sh db
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
-
------------------------------------------------------------
-MySQL, шаблон mytemplate-mysql-trap.xml
------------------------------------------------------------
+## MySQL, шаблон mytemplate-mysql-trap.xml
 
 В сценарии в подстроке
- '... --user=Пользователь_мониторинга --password=Пароль_мониторинга ...'
+```
+... --user=Пользователь_мониторинга --password=Пароль_мониторинга ...
+```
 установить свои значения 'Пользователь_мониторинга' и 'Пароль_мониторинга'.
 
 
-# Сценарий отправки статистики сервера MySQL на сервер Zabbix
+Сценарий отправки статистики сервера MySQL на сервер Zabbix
+```
 chmod 750 /etc/zabbix/mysql_stat.sh
 chown .zabbix /etc/zabbix/mysql_stat.sh
+```
 
-
-# Mysql-пользователь мониторинга
+Mysql-пользователь мониторинга
+```
 mysql -p
 mysql> GRANT USAGE ON *.* TO 'Пользователь_мониторинга'@'localhost' IDENTIFIED BY 'Пароль_мониторинга';
 mysql> FLUSH PRIVILEGES;
 mysql> \q
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= mysql_status,/etc/zabbix/mysql_stat.sh
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
+## Nginx, шаблон mytemplate-nginx-trap.xml
 
------------------------------------------------------------
-Nginx, шаблон mytemplate-nginx-trap.xml
------------------------------------------------------------
-
-# Сценарий отправки статистики сервера Nginx на сервер Zabbix
+Сценарий отправки статистики сервера Nginx на сервер Zabbix
+```
 chmod 750 /etc/zabbix/nginx_stat.sh
 chown .zabbix /etc/zabbix/nginx_stat.sh
+```
 
-В httpd.conf установить параметры:
- server_name - возвращаемое hostname имя хоста;
- listen и allow - IP адрес сервера.
+В `httpd.conf` установить параметры:
+- `server_name` - возвращаемое hostname имя хоста;
+- `listen` и `allow` - IP адрес сервера.
 
 
 /etc/nginx/nginx.conf - создание сервера мониторинга
+```
  # Сервер мониторинга -------------------------------------
  server {
   # Прослушиваемые адрес:порт(*:80|*:8000)
@@ -306,45 +324,49 @@ chown .zabbix /etc/zabbix/nginx_stat.sh
    stub_status		on;
   }
  }
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= nginx_status,/etc/zabbix/nginx_stat.sh
+```
 
-
-# Перезапуск сервисов
+Перезапуск сервисов
+```
 service nginx reload; service zabbix-agent restart
+```
 
+## Oracle, шаблон mytemplate-oracle-trap.xml
 
------------------------------------------------------------
-Oracle, шаблон mytemplate-oracle-trap.xml
------------------------------------------------------------
-
-# Сценарий отправки статистики сервера Oracle на сервер Zabbix
+Сценарий отправки статистики сервера Oracle на сервер Zabbix
+```
 chmod 750 /etc/zabbix/{oracle_stat.sh,oraenv}
 chown .zabbix /etc/zabbix/{oracle_stat.sh,oraenv}
+```
 
+Добавление пользователя, под которым запущен агент zabbix, в группу для доступа к SQL Plus
+```
+usermod --append --groups oinstall zabbix
+```
 
-# Добавление пользователя, под которым запущен агент zabbix, в группу для
-# доступа к SQL Plus
-/etc/group ----------------------------
-oinstall:x:500:zabbix
-
-
-# Переменные окружения Oracle
-/etc/zabbix/oraenv (из /home/oracle/.bash_profile)
+/etc/zabbix/oraenv - задать переменные окружения Oracle
+```
 export ORACLE_HOME=
 export PATH=$PATH:$ORACLE_HOME/bin
 export NLS_LANG=
 export TZ=
+```
 
-
-В сценарии в строке 'conn Пользователь_мониторинга/Пароль_мониторинга'
+В сценарии в строке
+```
+conn Пользователь_мониторинга/Пароль_мониторинга
+```
 установить свои значения 'Пользователь_мониторинга' и 'Пароль_мониторинга'.
 
 
-# Создание Oracle-пользователя и присвоение ему прав для всех БД
-# БД задается установкой переменной ORACLE_SID в ее SID перед запуском sqlplus
+Создание Oracle-пользователя и присвоение ему прав для всех БД.
+БД задается установкой переменной ORACLE_SID в ее SID перед запуском sqlplus
+```
 su - oracle
  export ORACLE_SID=
  sqlplus /nolog
@@ -364,28 +386,30 @@ su - oracle
   GRANT SELECT ON v_$system_event TO Пользователь_мониторинга;
   GRANT SELECT ON v_$event_name   TO Пользователь_мониторинга;
   GRANT SELECT ON v_$sort_segment TO Пользователь_мониторинга;
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= oracle_status[*],/etc/zabbix/oracle_stat.sh $1
 UserParameter		= oracle.discovery_databases,/etc/zabbix/oracle_stat.sh
 UserParameter		= oracle.discovery_tablespaces,/etc/zabbix/oracle_stat.sh tablespaces
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
+## Php-fpm, шаблон mytemplate-php-fpm-trap.xml
 
------------------------------------------------------------
-Php-fpm, шаблон mytemplate-php-fpm-trap.xml
------------------------------------------------------------
-
-# Сценарий отправки статистики сервера Php-fpm на сервер Zabbix
+Сценарий отправки статистики сервера Php-fpm на сервер Zabbix
+```
 chmod 750 /etc/zabbix/php-fpm_stat.sh
 chown .zabbix /etc/zabbix/php-fpm_stat.sh
-
+```
 
 /etc/nginx/nginx.conf - добавить в сервер мониторинга (описан в разделе nginx)
+```
   # Статистика php-fpm
   location = /ps {
    # Адрес:порт или файл UNIX-сокета FastCGI-сервера
@@ -395,104 +419,117 @@ chown .zabbix /etc/zabbix/php-fpm_stat.sh
    # Передаваемые FastCGI-серверу параметры
    fastcgi_param	SCRIPT_FILENAME ps;
   }
-
+```
 
 /etc/php-fpm.d/www.conf - в конфигурации пула
+```
 ;### Ссылка на страницу состояния FPM; не установлено - страница статуса не
 ; отображается()
 pm.status_path			= /ps
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= php-fpm_status,/etc/zabbix/php-fpm_stat.sh
+```
 
-
-# Перезапуск сервисов
+Перезапуск сервисов
+```
 service nginx reload; service php-fpm reload; service zabbix-agent restart
+```
 
+## Postfix, шаблон mytemplate-postfix-trap.xml
 
------------------------------------------------------------
-Postfix, шаблон mytemplate-postfix-trap.xml
------------------------------------------------------------
+Установить пакет `postfix-perl-scripts`.
+Используется сокращенный `logtail.pl` из пакета `logcheck`.
 
-Установить пакет postfix-perl-scripts.
-Используется сокращенный logtail.pl из пакета logcheck.
-
-
-# Сценарий отправки статистики сервера Postfix на сервер Zabbix
+Сценарий отправки статистики сервера Postfix на сервер Zabbix
+```
 chmod 750 /etc/zabbix/{logtail.pl,postfix_stat.sh}
 chown .zabbix /etc/zabbix/{logtail.pl,postfix_stat.sh}
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= postfix_status,/etc/zabbix/postfix_stat.sh
-
+```
 
 /etc/sudoers - запуск logtail под root пользователю zabbix
+```
 ### Агент Zabbix
 Defaults:zabbix	!requiretty
 zabbix		ALL=(ALL)	NOPASSWD: /etc/zabbix/logtail.pl -l /var/log/maillog -o /tmp/postfix_stat.dat
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
+## RabbitMQ, шаблон mytemplate-rabbitmq-trap.xml
 
------------------------------------------------------------
-RabbitMQ, шаблон mytemplate-rabbitmq-trap.xml
------------------------------------------------------------
-
-# Сценарий отправки статистики сервера RabbitMQ на сервер Zabbix
+Сценарий отправки статистики сервера RabbitMQ на сервер Zabbix
+```
 chmod 750 /etc/zabbix/{JSON.sh,rabbitmq_stat.sh}
 chown .zabbix /etc/zabbix/{JSON.sh,rabbitmq_stat.sh}
-
+```
 
 В сценарии в подстроке
- '... --user Пользователь_мониторинга:Пароль_мониторинга ...'
+```
+... --user Пользователь_мониторинга:Пароль_мониторинга ...
+```
 установить свои значения 'Пользователь_мониторинга' и 'Пароль_мониторинга'.
+
 Примечание: в сценарии доступ к статистике по протоколу https, на http можно
-исправить в подстроке "https://127.0.0.1:15672/api/$1".
+исправить в подстроке `https://127.0.0.1:15672/api/$1`.
 
 
 /etc/rabbitmq/enabled_plugins - добавить плагин управления rabbitmq_management
+```
 [...,rabbitmq_management].
+```
 
-
-# RabbitMQ-пользователь мониторинга
+RabbitMQ-пользователь мониторинга
+```
 rabbitmqctl add_user Пользователь_мониторинга Пароль_мониторинга
 rabbitmqctl set_user_tags Пользователь_мониторинга monitoring
 rabbitmqctl set_permissions Пользователь_мониторинга '' '' ''
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= rabbitmq_status,/etc/zabbix/rabbitmq_stat.sh
 UserParameter		= rabbitmq.discovery_queues,/etc/zabbix/rabbitmq_stat.sh queues
+```
 
-
-# Перезапуск агента
+Перезапуск агента
+```
 service zabbix-agent restart
+```
 
-
------------------------------------------------------------
-Sphinx, шаблон mytemplate-sphinx-trap.xml
------------------------------------------------------------
+## Sphinx, шаблон mytemplate-sphinx-trap.xml
 
 /etc/sphinx/sphinx.conf - локальное MySQL-соединение в разделе searchd
+```
  listen			= 127.0.0.1:9306:mysql41
+```
 
-
-# Сценарий отправки статистики сервера Sphinx на сервер Zabbix
+Сценарий отправки статистики сервера Sphinx на сервер Zabbix
+```
 chmod 750 /etc/zabbix/sphinx_stat.sh
 chown .zabbix /etc/zabbix/sphinx_stat.sh
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter		= sphinx_status,/etc/zabbix/sphinx_stat.sh
 UserParameter		= sphinx.discovery_indexes,/etc/zabbix/sphinx_stat.sh indexes
+```
 
-
-# Перезапуск сервисов
+Перезапуск сервисов
+```
 service searchd restart; service zabbix-agent restart
-
+```
 
 # Windows (Server 2012R2)
 
@@ -510,14 +547,17 @@ service searchd restart; service zabbix-agent restart
    C:\Scripts;
 
 2. Настройка агента в файле C:\Scripts\zabbix_agentd_win.conf:
+```
  SourceIP		= IP.адрес.zabbix.агента
  Server			= IP.адрес.zabbix.сервера
  ListenIP		= IP.адрес.zabbix.агента
  ServerActive		= IP.адрес.zabbix.сервера
  Hostname		= DNS.имя.сервера
  Timeout		= 10
+```
 
 3. Разрещение портов в Брандмауэре Windows:
+```
  Правила для входящих подключений - Создать правило...
   Тип правила					Для порта
   Протокол и порты
@@ -532,88 +572,98 @@ service searchd restart; service zabbix-agent restart
    Имя						Zabbix агент
  Zabbix агент - Свойства - Область - Удаленный IP-адрес
   Указанные IP-адреса - IP.адрес.zabbix.сервера
+```
 
 4. Установить сервис. Командная строка - Запустить от имени администратора:
+```
   C:\Scripts\zabbix_agentd.exe --config C:\Scripts\zabbix_agentd_win.conf --install
+```
 
 5. Разрешение выполнения неподписанных сценариев.
  Запустить powershell.exe от имени администратора:
+```
  PS > Set-ExecutionPolicy remotesigned
+```
 
 6. Установка требуемых сценариев.
 
 
------------------------------------------------------------
-PostgreSQL, шаблон mytemplate-windows-postgresql-trap.xml
------------------------------------------------------------
+## PostgreSQL, шаблон mytemplate-windows-postgresql-trap.xml
 
-PostgreSQL (от 1С) установлен в каталог E:\PostgreSQL\9.4.2-1.1C.
+PostgreSQL (от 1С) установлен в каталог `E:\PostgreSQL\9.4.2-1.1C`.
 
-# Создание пользователя мониторинга
+Пользователь мониторинга
+```
 E:\PostgreSQL\9.4.2-1.1C\bin\psql --username=postgres template1
 template1=# CREATE USER zabbix;
 template1=# \q
+```
 
-
-# Доступ без пароля пользователю мониторинга
-E:\PostgreSQL\9.4.2-1.1C\data\pg_hba.conf - первой строкой
+Доступ без пароля пользователю мониторинга первая строка в
+E:\PostgreSQL\9.4.2-1.1C\data\pg_hba.conf
+```
 host	template1	zabbix		127.0.0.1/32		trust
+```
 
-
-# Перезапуск PostgreSQL
-Службы - PostgreSQL Database Server - Перезапуск службы
+Перезапуск PostgreSQL
+`Службы - PostgreSQL Database Server - Перезапуск службы`
 
 
 В сценарии мониторинга C:\Scripts\postgresql_stat.ps1:
-- сохранить полное имя клиента PostgreSQL в переменной $PsqlExec;
-- в строке запуска zabbix_sender параметр host установить в DNS-имя сервера.
+- сохранить полное имя исполняемого файла клиента PostgreSQL в переменной `$PsqlExec`;
+- в строке запуска `zabbix_sender` параметр `host` установить в DNS-имя сервера.
 
 
 C:\Scripts\zabbix_agentd_win.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter=postgresql_status,powershell -File "c:\Scripts\postgresql_stat.ps1"
 UserParameter=postgresql.discovery_databases,powershell -File "c:\Scripts\postgresql_stat.ps1" db
+```
+
+Перезапуск агента
+`Службы - Zabbix Agent - Перезапуск службы`
 
 
-# Перезапуск агента
-Службы - Zabbix Agent - Перезапуск службы
+## RabbitMQ, шаблон mytemplate-rabbitmq-trap.xml
 
-
------------------------------------------------------------
-RabbitMQ, шаблон mytemplate-rabbitmq-trap.xml
------------------------------------------------------------
 Предполагается Erlang otp_win64_18.1.exe.
 
 В файле enabled_plugins - добавить плагин управления rabbitmq_management
+```
 [...,rabbitmq_management].
+```
 
-
-# Создание пользователя мониторинга
+Пользователь мониторинга
+```
 SET ERLANG_HOME="C:\Program Files\erl7.1"
 cd "C:\Program Files (x86)\RabbitMQ Server\rabbitmq_server-3.5.6\sbin"
 rabbitmqctl add_user Пользователь_мониторинга Пароль_мониторинга
 rabbitmqctl set_user_tags Пользователь_мониторинга monitoring
 rabbitmqctl set_permissions Пользователь_мониторинга '' '' ''
+```
 
-
-# Перезапуск RabbitMQ
-Службы - RabbitMQ - Перезапуск службы
+Перезапуск RabbitMQ
+`Службы - RabbitMQ - Перезапуск службы`
 
 
 В сценарии мониторинга RabbitMQ c:\Scripts\rabbitmq_stat.ps1:
 - в строке
-   '$wc.Credentials = New-Object System.Net.NetworkCredential('Пользователь_мониторинга', 'Пароль_мониторинга')'
+```
+   $wc.Credentials = New-Object System.Net.NetworkCredential('Пользователь_мониторинга', 'Пароль_мониторинга')
+```
   установить свои значения 'Пользователь_мониторинга' и 'Пароль_мониторинга'.
-- в строке запуска zabbix_sender параметр host установить в DNS-имя сервера.
+- в строке запуска `zabbix_sender` параметр `host` установить в DNS-имя сервера.
 
 
 Примечание: в сценарии доступ к статистике по протоколу https, на http можно
-исправить в строке '$uri = New-Object System.Uri("https://127.0.0.1:15672/api/$Query");'
+исправить в строке `$uri = New-Object System.Uri("https://127.0.0.1:15672/api/$Query");`
 
 
 C:\Scripts\zabbix_agentd_win.conf - подключение  сценария к zabbix-агенту
+```
 UserParameter=rabbitmq_status,powershell -File "c:\Scripts\rabbitmq_stat.ps1"
 UserParameter=rabbitmq.discovery_queues,powershell -File "c:\Scripts\rabbitmq_stat.ps1" queues
+```
 
-
-# Перезапуск агента
-Службы - Zabbix Agent - Перезапуск службы
+Перезапуск агента
+`Службы - Zabbix Agent - Перезапуск службы`
