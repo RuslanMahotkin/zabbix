@@ -42,17 +42,17 @@
 
 Порядок установки:
 
-1. Установка пакетов агента и утилиты отправки данных: zabbix, zabbix-agent,
+- Установка пакетов агента и утилиты отправки данных: zabbix, zabbix-agent,
  zabbix-sender.
 
-2. Запуск агента при старте системы и права на каталог/файл конфигурации:
+- Запуск агента при старте системы и права на каталог/файл конфигурации:
 ```
  chmod 700 /etc/rc.d/init.d/zabbix-agent; chkconfig zabbix-agent on
  chmod 2750 /etc/zabbix; chown -R .zabbix /etc/zabbix
  chmod 640 /etc/zabbix/zabbix_agentd.conf
 ```
 
-3. Разрещение портов в файерволе:
+- Разрешение портов в файерволе:
 ```
  # IP адрес сервера Zabbix
  $ZabbServIP='X.X.X.X'
@@ -64,7 +64,7 @@
  /sbin/iptables -A INPUT  -p tcp --sport 10051 -s $ZabbServIP -j ACCEPT
 ```
 
-4. Настройка агента в файле /etc/zabbix/zabbix_agentd.conf:
+- Настройка агента в файле /etc/zabbix/zabbix_agentd.conf:
 ```
  SourceIP		= IP.адрес.zabbix.агента
  Server			= IP.адрес.zabbix.сервера
@@ -73,7 +73,7 @@
  Timeout		= >5
 ```
 
-5. Установка требуемых сценариев.
+- Установка требуемых сценариев.
 
 
 Для обработки JSON данных в мониторинге Elasticsearch, MongoDB и RabbitMQ
@@ -543,10 +543,10 @@ service searchd restart; service zabbix-agent restart
 
 Установка:
 
-1. Скопировать zabbix_agentd.exe, zabbix_sender.exe, zabbix_agentd_win.conf в
+- Скопировать zabbix_agentd.exe, zabbix_sender.exe, zabbix_agentd_win.conf в
    C:\Scripts;
 
-2. Настройка агента в файле C:\Scripts\zabbix_agentd_win.conf:
+- Настройка агента в файле C:\Scripts\zabbix_agentd_win.conf:
 ```
  SourceIP		= IP.адрес.zabbix.агента
  Server			= IP.адрес.zabbix.сервера
@@ -556,7 +556,7 @@ service searchd restart; service zabbix-agent restart
  Timeout		= 10
 ```
 
-3. Разрещение портов в Брандмауэре Windows:
+- Разрешение портов в Брандмауэре Windows:
 ```
  Правила для входящих подключений - Создать правило...
   Тип правила					Для порта
@@ -574,18 +574,18 @@ service searchd restart; service zabbix-agent restart
   Указанные IP-адреса - IP.адрес.zabbix.сервера
 ```
 
-4. Установить сервис. Командная строка - Запустить от имени администратора:
+- Установка сервиса. Командная строка - Запустить от имени администратора:
 ```
   C:\Scripts\zabbix_agentd.exe --config C:\Scripts\zabbix_agentd_win.conf --install
 ```
 
-5. Разрешение выполнения неподписанных сценариев.
+- Разрешение выполнения неподписанных сценариев.
  Запустить powershell.exe от имени администратора:
 ```
  PS > Set-ExecutionPolicy remotesigned
 ```
 
-6. Установка требуемых сценариев.
+- Установка требуемых сценариев.
 
 
 ## PostgreSQL, шаблон mytemplate-windows-postgresql-trap.xml
