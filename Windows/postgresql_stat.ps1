@@ -1,50 +1,50 @@
-# Отправка статистики сервера PostgreSQL на сервер Zabbix
+# РћС‚РїСЂР°РІРєР° СЃС‚Р°С‚РёСЃС‚РёРєРё СЃРµСЂРІРµСЂР° PostgreSQL РЅР° СЃРµСЂРІРµСЂ Zabbix
 
-# Полное имя исполняемого файла клиента PostgreSQL
+# РџРѕР»РЅРѕРµ РёРјСЏ РёСЃРїРѕР»РЅСЏРµРјРѕРіРѕ С„Р°Р№Р»Р° РєР»РёРµРЅС‚Р° PostgreSQL
 $PsqlExec = 'E:\PostgreSQL\9.4.2-1.1C\bin\psql'
 
 
 function PSql($SQLStr){
-# Выполнение запросов вызовом psql. Параметры: 1 - строка SQL-запросов
+# Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ РІС‹Р·РѕРІРѕРј psql. РџР°СЂР°РјРµС‚СЂС‹: 1 - СЃС‚СЂРѕРєР° SQL-Р·Р°РїСЂРѕСЃРѕРІ
 
- # Выполнение запросов:
- #  quiet - без сообщений, только результата запроса;
- #  field-separator= - разделитель полей;
- #  no-align - режим невыравненной таблицы;
- #  tuples-only - только строки результата
+ # Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ:
+ #  quiet - Р±РµР· СЃРѕРѕР±С‰РµРЅРёР№, С‚РѕР»СЊРєРѕ СЂРµР·СѓР»СЊС‚Р°С‚Р° Р·Р°РїСЂРѕСЃР°;
+ #  field-separator= - СЂР°Р·РґРµР»РёС‚РµР»СЊ РїРѕР»РµР№;
+ #  no-align - СЂРµР¶РёРј РЅРµРІС‹СЂР°РІРЅРµРЅРЅРѕР№ С‚Р°Р±Р»РёС†С‹;
+ #  tuples-only - С‚РѕР»СЊРєРѕ СЃС‚СЂРѕРєРё СЂРµР·СѓР»СЊС‚Р°С‚Р°
  $RespStr = & $PsqlExec --quiet --field-separator=" " --no-align --tuples-only --host=127.0.0.1 --username=zabbix --command="$SQLStr;" template1 2>&1
- # Выполнение запросов успешно - возврат строки результата
+ # Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ СѓСЃРїРµС€РЅРѕ - РІРѕР·РІСЂР°С‚ СЃС‚СЂРѕРєРё СЂРµР·СѓР»СЊС‚Р°С‚Р°
  if( $? ){ return $RespStr }
- # Статистика недоступна - возврат статуса сервиса - 'не работает'
+ # РЎС‚Р°С‚РёСЃС‚РёРєР° РЅРµРґРѕСЃС‚СѓРїРЅР° - РІРѕР·РІСЂР°С‚ СЃС‚Р°С‚СѓСЃР° СЃРµСЂРІРёСЃР° - 'РЅРµ СЂР°Р±РѕС‚Р°РµС‚'
  Write-Host 0
- # Выход из сценария
+ # Р’С‹С…РѕРґ РёР· СЃС†РµРЅР°СЂРёСЏ
  exit 1
 }
 
 
-# Получение строки списка БД
+# РџРѕР»СѓС‡РµРЅРёРµ СЃС‚СЂРѕРєРё СЃРїРёСЃРєР° Р‘Р”
 $DBStr = PSql "SELECT datname FROM pg_stat_database where datname not like 'template%'"
 
-# Есть аргумент командной строки определения БД
+# Р•СЃС‚СЊ Р°СЂРіСѓРјРµРЅС‚ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё РѕРїСЂРµРґРµР»РµРЅРёСЏ Р‘Р”
 if( $args[0] -and $args[0] -eq 'db' ){
- # Трансляция строки списка БД в формат JSON
+ # РўСЂР°РЅСЃР»СЏС†РёСЏ СЃС‚СЂРѕРєРё СЃРїРёСЃРєР° Р‘Р” РІ С„РѕСЂРјР°С‚ JSON
  $DBStr = $DBStr -split '`n' -join '"},{"{#DBNAME}":"'
  if( $DBStr ){ $DBStr = "{`"{#DBNAME}`":`"" + $DBStr + "`"}" }
  $DBStr = "{`"data`":[" + $DBStr + "]}"
- # Вывод JSON-списка БД
+ # Р’С‹РІРѕРґ JSON-СЃРїРёСЃРєР° Р‘Р”
  Write-Host -NoNewLine $DBStr
 
-# Отправка данных
+# РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С…
 }else{
- # Строка SQL-запросов
+ # РЎС‚СЂРѕРєР° SQL-Р·Р°РїСЂРѕСЃРѕРІ
  $SelectsStr = '';
- # Добавление в строку запросов статистики по БД
- # Запросы значения поля из таблицы pg_stat_database для БД
+ # Р”РѕР±Р°РІР»РµРЅРёРµ РІ СЃС‚СЂРѕРєСѓ Р·Р°РїСЂРѕСЃРѕРІ СЃС‚Р°С‚РёСЃС‚РёРєРё РїРѕ Р‘Р”
+ # Р—Р°РїСЂРѕСЃС‹ Р·РЅР°С‡РµРЅРёСЏ РїРѕР»СЏ РёР· С‚Р°Р±Р»РёС†С‹ pg_stat_database РґР»СЏ Р‘Р”
  'numbackends', 'deadlocks', 'tup_returned', 'tup_fetched', 'tup_inserted', 'tup_updated',`
   'tup_deleted', 'temp_files', 'temp_bytes', 'blk_read_time', 'blk_write_time',`
   'xact_commit', 'xact_rollback' | Where { $SelectsStr += "select '- postgresql." + $_ +
   "['||datname||'] '||" + $_ + " from pg_stat_database where datname not like 'template%' union " }
- # Комплексные запросы для БД
+ # РљРѕРјРїР»РµРєСЃРЅС‹Рµ Р·Р°РїСЂРѕСЃС‹ РґР»СЏ Р‘Р”
  $DBStr -split '`n' | Where { $SelectsStr += "select '- postgresql.size[" + $_ +
   "] '||pg_database_size('" + $_ + "') union select '- postgresql.cache[" + $_ +
   "] '||cast(blks_hit/(blks_read+blks_hit+0.000001)*100.0 as numeric(5,2)) from pg_stat_database where datname='" +
@@ -53,8 +53,8 @@ if( $args[0] -and $args[0] -eq 'db' ){
   $_ + "' union "
   }
  
- # Добавление в строку запросов общей статистики
- # Запросы значения количества из таблицы pg_stat_activity: 'параметр' = 'фильтр'
+ # Р”РѕР±Р°РІР»РµРЅРёРµ РІ СЃС‚СЂРѕРєСѓ Р·Р°РїСЂРѕСЃРѕРІ РѕР±С‰РµР№ СЃС‚Р°С‚РёСЃС‚РёРєРё
+ # Р—Р°РїСЂРѕСЃС‹ Р·РЅР°С‡РµРЅРёСЏ РєРѕР»РёС‡РµСЃС‚РІР° РёР· С‚Р°Р±Р»РёС†С‹ pg_stat_activity: 'РїР°СЂР°РјРµС‚СЂ' = 'С„РёР»СЊС‚СЂ'
  @{
   'active'   = "state='active'";
   'idle'     = "state='idle'";
@@ -64,13 +64,13 @@ if( $args[0] -and $args[0] -eq 'db' ){
  }.GetEnumerator() | Where { $SelectsStr += "select '- postgresql.connections." + $_.Key +
   " '||count(*) from pg_stat_activity where " + $_.Value + " union " }
 
- # Запросы значения поля из таблицы pg_stat_activity
+ # Р—Р°РїСЂРѕСЃС‹ Р·РЅР°С‡РµРЅРёСЏ РїРѕР»СЏ РёР· С‚Р°Р±Р»РёС†С‹ pg_stat_activity
  'buffers_alloc', 'buffers_backend', 'buffers_backend_fsync', 'buffers_checkpoint',`
   'buffers_clean', 'checkpoints_req', 'checkpoints_timed', 'maxwritten_clean' |
   Where { $SelectsStr += "select '- postgresql." + $_ + " '||" + $_ +
   " from pg_stat_bgwriter union " }
 
- # Запросы количества медленных запросов из таблицы pg_stat_activity: 'параметр' = 'фильтр'
+ # Р—Р°РїСЂРѕСЃС‹ РєРѕР»РёС‡РµСЃС‚РІР° РјРµРґР»РµРЅРЅС‹С… Р·Р°РїСЂРѕСЃРѕРІ РёР· С‚Р°Р±Р»РёС†С‹ pg_stat_activity: 'РїР°СЂР°РјРµС‚СЂ' = 'С„РёР»СЊС‚СЂ'
  @{
   'slow.dml'     = "~* '^(insert|update|delete)'";
   'slow.queries' = "ilike '%'";
@@ -79,15 +79,15 @@ if( $args[0] -and $args[0] -eq 'db' ){
   " '||count(*) from pg_stat_activity where state='active' and now()-query_start>'5 sec'::interval and query " +
   $_.Value + " union " }
 
- # Максимальное количество соединений
+ # РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРѕРµРґРёРЅРµРЅРёР№
  $SelectsStr += "select '- postgresql.connections.max '||setting::int from pg_settings where name='max_connections'"
 
- # Выполнение запросов и отправка строки вывода серверу Zabbix. Параметры zabbix_sender:
- #  --config      файл конфигурации агента;
- #  --host        имя узла сети на сервере Zabbix;
- #  --input-file  файл данных('-' - стандартный ввод)
- PSql $SelectsStr | c:\Scripts\zabbix_sender.exe --config "c:\Scripts\zabbix_agentd_win.conf" --host "DNS.имя.сервера" --input-file - 2>&1 | Out-Null
+ # Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ Рё РѕС‚РїСЂР°РІРєР° СЃС‚СЂРѕРєРё РІС‹РІРѕРґР° СЃРµСЂРІРµСЂСѓ Zabbix. РџР°СЂР°РјРµС‚СЂС‹ zabbix_sender:
+ #  --config      С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё Р°РіРµРЅС‚Р°;
+ #  --host        РёРјСЏ СѓР·Р»Р° СЃРµС‚Рё РЅР° СЃРµСЂРІРµСЂРµ Zabbix;
+ #  --input-file  С„Р°Р№Р» РґР°РЅРЅС‹С…('-' - СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РІРІРѕРґ)
+ PSql $SelectsStr | c:\Scripts\zabbix_sender.exe --config "c:\Scripts\zabbix_agentd_win.conf" --host "DNS.РёРјСЏ.СЃРµСЂРІРµСЂР°" --input-file - 2>&1 | Out-Null
 
- # Возврат статуса сервиса - 'работает'
+ # Р’РѕР·РІСЂР°С‚ СЃС‚Р°С‚СѓСЃР° СЃРµСЂРІРёСЃР° - 'СЂР°Р±РѕС‚Р°РµС‚'
  Write-Host 1
 }

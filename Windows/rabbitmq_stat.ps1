@@ -1,57 +1,57 @@
-# Отправка статистики сервера RabbitMQ на сервер Zabbix
+# РћС‚РїСЂР°РІРєР° СЃС‚Р°С‚РёСЃС‚РёРєРё СЃРµСЂРІРµСЂР° RabbitMQ РЅР° СЃРµСЂРІРµСЂ Zabbix
 
 
 function RabbitMQAPI($Query){
-# Запрос к API PabbitMQ. Параметры: 1 - строка параметров запроса API
+# Р—Р°РїСЂРѕСЃ Рє API PabbitMQ. РџР°СЂР°РјРµС‚СЂС‹: 1 - СЃС‚СЂРѕРєР° РїР°СЂР°РјРµС‚СЂРѕРІ Р·Р°РїСЂРѕСЃР° API
 
- # Объект Uri API PabbitMQ
+ # РћР±СЉРµРєС‚ Uri API PabbitMQ
  $uri = New-Object System.Uri("https://127.0.0.1:15672/api/$Query");
 
- # Предотвращение преобразования '%2f' в символ '/'
- # Инициализация объекта Uri
+ # РџСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ '%2f' РІ СЃРёРјРІРѕР» '/'
+ # РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РѕР±СЉРµРєС‚Р° Uri
  $uri.PathAndQuery | Out-Null
  $flagsField = $uri.GetType().GetField("m_Flags", [Reflection.BindingFlags]::NonPublic -bor [Reflection.BindingFlags]::Instance)
  # remove flags Flags.PathNotCanonical and Flags.QueryNotCanonical
  $flagsField.SetValue($uri, [UInt64]([UInt64]$flagsField.GetValue($uri) -band (-bnot 0x30)))
 
  $RespStr = $wc.DownloadString($uri) | ConvertFrom-Json
- # Выполнение запроса успешно - возврат строки результата
+ # Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃР° СѓСЃРїРµС€РЅРѕ - РІРѕР·РІСЂР°С‚ СЃС‚СЂРѕРєРё СЂРµР·СѓР»СЊС‚Р°С‚Р°
  if( $? ){ return $RespStr }
- # Статистика недоступна - возврат статуса сервиса - 'не работает'
+ # РЎС‚Р°С‚РёСЃС‚РёРєР° РЅРµРґРѕСЃС‚СѓРїРЅР° - РІРѕР·РІСЂР°С‚ СЃС‚Р°С‚СѓСЃР° СЃРµСЂРІРёСЃР° - 'РЅРµ СЂР°Р±РѕС‚Р°РµС‚'
  Write-Host 0
- # Выход из сценария
+ # Р’С‹С…РѕРґ РёР· СЃС†РµРЅР°СЂРёСЏ
  exit 1
 }
 
 
-# Кодировка вывода - кодировка консоли
+# РљРѕРґРёСЂРѕРІРєР° РІС‹РІРѕРґР° - РєРѕРґРёСЂРѕРІРєР° РєРѕРЅСЃРѕР»Рё
 $OutputEncoding = [Console]::OutputEncoding
-# Отключение проверки сертификата сервера
+# РћС‚РєР»СЋС‡РµРЅРёРµ РїСЂРѕРІРµСЂРєРё СЃРµСЂС‚РёС„РёРєР°С‚Р° СЃРµСЂРІРµСЂР°
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
-# Вебклиент для получения данных идентифицируемых по URI ресурсов
+# Р’РµР±РєР»РёРµРЅС‚ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РґР°РЅРЅС‹С… РёРґРµРЅС‚РёС„РёС†РёСЂСѓРµРјС‹С… РїРѕ URI СЂРµСЃСѓСЂСЃРѕРІ
 $wc = New-Object System.Net.WebClient
-# Данные аутентификации
-$wc.Credentials = New-Object System.Net.NetworkCredential('Пользователь_мониторинга', 'Пароль_мониторинга')
+# Р”Р°РЅРЅС‹Рµ Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё
+$wc.Credentials = New-Object System.Net.NetworkCredential('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ_РјРѕРЅРёС‚РѕСЂРёРЅРіР°', 'РџР°СЂРѕР»СЊ_РјРѕРЅРёС‚РѕСЂРёРЅРіР°')
 
-# Получение строки списка очередей
+# РџРѕР»СѓС‡РµРЅРёРµ СЃС‚СЂРѕРєРё СЃРїРёСЃРєР° РѕС‡РµСЂРµРґРµР№
 $QueuesStr = RabbitMQAPI 'queues?columns=name'
 
-# Есть аргумент командной строки определения очередей
+# Р•СЃС‚СЊ Р°СЂРіСѓРјРµРЅС‚ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё РѕРїСЂРµРґРµР»РµРЅРёСЏ РѕС‡РµСЂРµРґРµР№
 if( $args[0] -and $args[0] -eq 'queues' ){
- # Трансляция строки списка очередей в формат JSON
+ # РўСЂР°РЅСЃР»СЏС†РёСЏ СЃС‚СЂРѕРєРё СЃРїРёСЃРєР° РѕС‡РµСЂРµРґРµР№ РІ С„РѕСЂРјР°С‚ JSON
  $QueuesStr = $QueuesStr.name -split '`n' -join '"},{"{#QUEUENAME}":"'
  if( $QueuesStr ){ $QueuesStr = "{`"{#QUEUENAME}`":`"" + $QueuesStr + "`"}" }
  $QueuesStr = "{`"data`":[" + $QueuesStr + "]}"
- # Вывод JSON-списка очередей
+ # Р’С‹РІРѕРґ JSON-СЃРїРёСЃРєР° РѕС‡РµСЂРµРґРµР№
  Write-Host -NoNewLine $QueuesStr
 
-# Отправка данных
+# РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С…
 }else{
- # Строка вывода
+ # РЎС‚СЂРѕРєР° РІС‹РІРѕРґР°
  $OutStr = ''
- # Общая статистика
+ # РћР±С‰Р°СЏ СЃС‚Р°С‚РёСЃС‚РёРєР°
  $Overview = RabbitMQAPI 'overview?columns=message_stats,queue_totals,object_totals'
- # Обработка требуемых параметров общей статистики
+ # РћР±СЂР°Р±РѕС‚РєР° С‚СЂРµР±СѓРµРјС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ РѕР±С‰РµР№ СЃС‚Р°С‚РёСЃС‚РёРєРё
  foreach($ParName in 'message_stats.ack_details.rate', 'message_stats.ack',
   'message_stats.deliver_get_details.rate', 'message_stats.deliver_get',
   'message_stats.get_details.rate', 'message_stats.get',
@@ -60,40 +60,40 @@ if( $args[0] -and $args[0] -eq 'queues' ){
   'object_totals.consumers', 'object_totals.exchanges', 'object_totals.queues',
   'queue_totals.messages', 'queue_totals.messages_ready',
   'queue_totals.messages_unacknowledged'){
-  # Значение параметра - изначально корневой переменной
+  # Р—РЅР°С‡РµРЅРёРµ РїР°СЂР°РјРµС‚СЂР° - РёР·РЅР°С‡Р°Р»СЊРЅРѕ РєРѕСЂРЅРµРІРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
   $ParValue = $Overview
-  # Получение значения параметра
+  # РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂР°
   foreach($i in $ParName.Split('.')){ $ParValue = $ParValue.$i }
-  # Параметр не определен - инициализация нулевым значением
+  # РџР°СЂР°РјРµС‚СЂ РЅРµ РѕРїСЂРµРґРµР»РµРЅ - РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РЅСѓР»РµРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј
   if($ParValue -eq $null){ $ParValue = 0 }
-  # Вывод имени и значения параметра в формате zabbix_sender
+  # Р’С‹РІРѕРґ РёРјРµРЅРё Рё Р·РЅР°С‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂР° РІ С„РѕСЂРјР°С‚Рµ zabbix_sender
   $OutStr += '- rabbitmq.' + $ParName + ' ' + $ParValue + "`n"
  }
 
- # Обработка списка очередей
+ # РћР±СЂР°Р±РѕС‚РєР° СЃРїРёСЃРєР° РѕС‡РµСЂРµРґРµР№
  foreach($Queue in $QueuesStr.name.Split('`n')){
-  # Строка запроса статистики очереди
+  # РЎС‚СЂРѕРєР° Р·Р°РїСЂРѕСЃР° СЃС‚Р°С‚РёСЃС‚РёРєРё РѕС‡РµСЂРµРґРё
   $QueueQueryStr = 'queues/%2f/' + $Queue + '?columns=message_stats,memory,messages,messages_ready,messages_unacknowledged,consumers'
-   # Статистика очереди
+   # РЎС‚Р°С‚РёСЃС‚РёРєР° РѕС‡РµСЂРµРґРё
   $QueueStat = RabbitMQAPI "$QueueQueryStr"
-  # Обработка требуемых параметров статистики очереди
+  # РћР±СЂР°Р±РѕС‚РєР° С‚СЂРµР±СѓРµРјС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ СЃС‚Р°С‚РёСЃС‚РёРєРё РѕС‡РµСЂРµРґРё
   foreach($ParName in 'consumers', 'memory', 'messages', 'messages_unacknowledged', 'messages_ready'){
-   # Значение параметра
+   # Р—РЅР°С‡РµРЅРёРµ РїР°СЂР°РјРµС‚СЂР°
    $ParValue = $QueueStat.$ParName
-   # Параметр не определен - инициализация нулевым значением
+   # РџР°СЂР°РјРµС‚СЂ РЅРµ РѕРїСЂРµРґРµР»РµРЅ - РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РЅСѓР»РµРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј
    if($ParValue -eq $null){ $ParValue = 0 }
-   # Вывод имени и значения параметра в формате zabbix_sender
+   # Р’С‹РІРѕРґ РёРјРµРЅРё Рё Р·РЅР°С‡РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂР° РІ С„РѕСЂРјР°С‚Рµ zabbix_sender
    $OutStr += '- rabbitmq.' + $ParName + '[' + $Queue + '] ' + $ParValue + "`n"
   }
  }
 
- # Удаление последнего перевода строки.
- # Отправка строки вывода серверу Zabbix. Параметры zabbix_sender:
- #  --config      файл конфигурации агента;
- #  --host        имя узла сети на сервере Zabbix;
- #  --input-file  файл данных('-' - стандартный ввод)
- $OutStr.TrimEnd("`n") | c:\Scripts\zabbix_sender.exe --config "c:\Scripts\zabbix_agentd_win.conf" --host "DNS.имя.сервера" --input-file - 2>&1 | Out-Null
+ # РЈРґР°Р»РµРЅРёРµ РїРѕСЃР»РµРґРЅРµРіРѕ РїРµСЂРµРІРѕРґР° СЃС‚СЂРѕРєРё.
+ # РћС‚РїСЂР°РІРєР° СЃС‚СЂРѕРєРё РІС‹РІРѕРґР° СЃРµСЂРІРµСЂСѓ Zabbix. РџР°СЂР°РјРµС‚СЂС‹ zabbix_sender:
+ #  --config      С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё Р°РіРµРЅС‚Р°;
+ #  --host        РёРјСЏ СѓР·Р»Р° СЃРµС‚Рё РЅР° СЃРµСЂРІРµСЂРµ Zabbix;
+ #  --input-file  С„Р°Р№Р» РґР°РЅРЅС‹С…('-' - СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РІРІРѕРґ)
+ $OutStr.TrimEnd("`n") | c:\Scripts\zabbix_sender.exe --config "c:\Scripts\zabbix_agentd_win.conf" --host "DNS.РёРјСЏ.СЃРµСЂРІРµСЂР°" --input-file - 2>&1 | Out-Null
 
- # Возврат статуса сервиса - 'работает'
+ # Р’РѕР·РІСЂР°С‚ СЃС‚Р°С‚СѓСЃР° СЃРµСЂРІРёСЃР° - 'СЂР°Р±РѕС‚Р°РµС‚'
  Write-Host 1
 }
