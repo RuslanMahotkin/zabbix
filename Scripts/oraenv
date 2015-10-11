@@ -1,0 +1,4 @@
+export ORACLE_HOME=/app/oracle/product/10.2.0/db_1
+export PATH=$PATH:$ORACLE_HOME/bin
+export NLS_LANG="RUSSIAN_CIS.CL8MSWIN1251"
+export TZ=Etc/GMT-3
