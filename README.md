@@ -31,7 +31,7 @@
 2. Сценарий получает, фильтрует, обрабатывает и отправляет на сервер zabbix_sender-ом все данные за один раз.
 
 
-CentOS 6.X ================================================
+# Linux (CentOS 6.X)
 
 Сценарии:
 - написаны на bash;
@@ -46,11 +46,13 @@ CentOS 6.X ================================================
  zabbix-sender.
 
 2. Запуск агента при старте системы и права на каталог/файл конфигурации:
+```
  chmod 700 /etc/rc.d/init.d/zabbix-agent; chkconfig zabbix-agent on
  chmod 2750 /etc/zabbix; chown -R .zabbix /etc/zabbix
  chmod 640 /etc/zabbix/zabbix_agentd.conf
-
+```
 3. Разрещение портов в файерволе:
+```
  # IP адрес сервера Zabbix
  $ZabbServIP='X.X.X.X'
  # Агент
@@ -59,14 +61,15 @@ CentOS 6.X ================================================
  # Сервер
  /sbin/iptables -A OUTPUT -p tcp --dport 10051 -d $ZabbServIP -j ACCEPT
  /sbin/iptables -A INPUT  -p tcp --sport 10051 -s $ZabbServIP -j ACCEPT
-
+```
 4. Настройка агента в файле /etc/zabbix/zabbix_agentd.conf:
+```
  SourceIP		= IP.адрес.zabbix.агента
  Server			= IP.адрес.zabbix.сервера
  ListenIP		= IP.адрес.zabbix.агента
  ServerActive		= IP.адрес.zabbix.сервера
  Timeout		= >5
-
+```
 5. Установка требуемых сценариев.
 
 
@@ -74,32 +77,33 @@ CentOS 6.X ================================================
 используется исправленный JSON.sh (http://github.com/dominictarr/JSON.sh).
 
 
------------------------------------------------------------
-Apache, шаблон mytemplate-apache-trap.xml
------------------------------------------------------------
+## Apache, шаблон mytemplate-apache-trap.xml
 
 Предполагается, что Apache работает за nginx-ом.
 
-# Сценарий отправки статистики сервера Apache на сервер Zabbix
+Сценарий отправки статистики сервера Apache на сервер Zabbix
+```
 chmod 750 /etc/zabbix/apache_stat.sh
 chown .zabbix /etc/zabbix/apache_stat.sh
-
+```
 
 /etc/nginx/nginx.conf - добавить в сервер мониторинга (описан в разделе nginx)
+```
   # Статистика apache
   location = /as {
    # Адрес проксируемоего сервера
    proxy_pass		http://127.0.0.1;
   }
-
+```
 
 В httpd.conf установить параметры:
- ServerName - возвращаемое hostname имя хоста;
- Allow from - IP адрес сервера
+- `ServerName` - возвращаемое hostname имя хоста;
+- `Allow from` - IP адрес сервера.
 
 
 /etc/https/conf/httpd.conf - создание сервера мониторинга
-### Модуль статуса
+```
+# Модуль статуса
 LoadModule		status_module modules/mod_status.so
 ...
 # Сохранение расширенной информации о каждом запросе
@@ -118,14 +122,14 @@ ExtendedStatus		On
   Allow			from	IP.адрес.сер.вера
  </Location>
 </VirtualHost>
-
+```
 
 /etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
-UserParameter		= apache_status,/etc/zabbix/apache_stat.sh
+`UserParameter		= apache_status,/etc/zabbix/apache_stat.sh`
 
 
-# Перезапуск сервисов
-service nginx reload; service httpd restart; service zabbix-agent restart
+Перезапуск сервисов
+`service nginx reload; service httpd restart; service zabbix-agent restart`
 
 
 -----------------------------------------------------------
@@ -490,7 +494,7 @@ UserParameter		= sphinx.discovery_indexes,/etc/zabbix/sphinx_stat.sh indexes
 service searchd restart; service zabbix-agent restart
 
 
-Windows (Server 2012R2) ===================================
+# Windows (Server 2012R2)
 
 Сценарии:
 - написаны на Powershell;
