@@ -127,7 +127,7 @@ ExtendedStatus		On
 </VirtualHost>
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= apache_status,/etc/zabbix/apache_stat.sh
 ```
@@ -177,7 +177,7 @@ chmod 750 /etc/zabbix/asterisk_stat.sh
 chown .zabbix /etc/zabbix/asterisk_stat.sh
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= asterisk_status,/etc/zabbix/asterisk_stat.sh
 ```
@@ -196,7 +196,7 @@ chmod 750 /etc/zabbix/{elasticsearch_stat.sh,JSON.sh}
 chown .zabbix /etc/zabbix/{elasticsearch_stat.sh,JSON.sh}
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= elasticsearch_status,/etc/zabbix/elasticsearch_stat.sh
 ```
@@ -222,7 +222,7 @@ chmod 750 /etc/zabbix/io_stat.sh
 chown .zabbix /etc/zabbix/io_stat.sh
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= iostat_status,/etc/zabbix/io_stat.sh
 UserParameter		= iostat.discovery_disks,/etc/zabbix/io_stat.sh disks
@@ -241,7 +241,7 @@ chmod 750 /etc/zabbix/{JSON.sh,mongodb_stat.sh}
 chown .zabbix /etc/zabbix/{JSON.sh,mongodb_stat.sh}
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= mongodb_status,/etc/zabbix/mongodb_stat.sh
 UserParameter		= mongodb.discovery_db,/etc/zabbix/mongodb_stat.sh db
@@ -275,9 +275,35 @@ mysql> FLUSH PRIVILEGES;
 mysql> \q
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= mysql_status,/etc/zabbix/mysql_stat.sh
+```
+
+Перезапуск агента
+```
+service zabbix-agent restart
+```
+
+## MySQL репликация, шаблон mytemplate-mysql-slave-trap.xml
+
+Сценарий отправки статистики репликации сервера MySQL на сервер Zabbix
+```
+chmod 750 /etc/zabbix/mysql_slave_stat.sh
+chown .zabbix /etc/zabbix/mysql_slave_stat.sh
+```
+
+Привилегия клиента репликации Mysql-пользователю мониторинга
+```
+mysql -p
+mysql> GRANT REPLICATION CLIENT ON *.* TO 'Пользователь_мониторинга'@'localhost';
+mysql> FLUSH PRIVILEGES;
+mysql> \q
+```
+
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
+```
+UserParameter		= mysql_slave_status,/etc/zabbix/mysql_slave_stat.sh
 ```
 
 Перезапуск агента
@@ -326,7 +352,7 @@ chown .zabbix /etc/zabbix/nginx_stat.sh
  }
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= nginx_status,/etc/zabbix/nginx_stat.sh
 ```
@@ -388,7 +414,7 @@ su - oracle
   GRANT SELECT ON v_$sort_segment TO Пользователь_мониторинга;
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= oracle_status[*],/etc/zabbix/oracle_stat.sh $1
 UserParameter		= oracle.discovery_databases,/etc/zabbix/oracle_stat.sh
@@ -428,7 +454,7 @@ chown .zabbix /etc/zabbix/php-fpm_stat.sh
 pm.status_path			= /ps
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= php-fpm_status,/etc/zabbix/php-fpm_stat.sh
 ```
@@ -449,7 +475,7 @@ chmod 750 /etc/zabbix/{logtail.pl,postfix_stat.sh}
 chown .zabbix /etc/zabbix/{logtail.pl,postfix_stat.sh}
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= postfix_status,/etc/zabbix/postfix_stat.sh
 ```
@@ -496,7 +522,7 @@ rabbitmqctl set_user_tags Пользователь_мониторинга monito
 rabbitmqctl set_permissions Пользователь_мониторинга '' '' ''
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= rabbitmq_status,/etc/zabbix/rabbitmq_stat.sh
 UserParameter		= rabbitmq.discovery_queues,/etc/zabbix/rabbitmq_stat.sh queues
@@ -520,7 +546,7 @@ chmod 750 /etc/zabbix/sphinx_stat.sh
 chown .zabbix /etc/zabbix/sphinx_stat.sh
 ```
 
-/etc/zabbix/zabbix_agentd.conf - подключение  сценария к zabbix-агенту
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter		= sphinx_status,/etc/zabbix/sphinx_stat.sh
 UserParameter		= sphinx.discovery_indexes,/etc/zabbix/sphinx_stat.sh indexes
@@ -614,7 +640,7 @@ host	template1	zabbix		127.0.0.1/32		trust
 - в строке запуска `zabbix_sender` параметр `host` установить в DNS-имя сервера.
 
 
-C:\Scripts\zabbix_agentd_win.conf - подключение  сценария к zabbix-агенту
+C:\Scripts\zabbix_agentd_win.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter=postgresql_status,powershell -File "c:\Scripts\postgresql_stat.ps1"
 UserParameter=postgresql.discovery_databases,powershell -File "c:\Scripts\postgresql_stat.ps1" db
@@ -659,7 +685,7 @@ rabbitmqctl set_permissions Пользователь_мониторинга '' '
 исправить в строке `$uri = New-Object System.Uri("https://127.0.0.1:15672/api/$Query");`
 
 
-C:\Scripts\zabbix_agentd_win.conf - подключение  сценария к zabbix-агенту
+C:\Scripts\zabbix_agentd_win.conf - подключение сценария к zabbix-агенту
 ```
 UserParameter=rabbitmq_status,powershell -File "c:\Scripts\rabbitmq_stat.ps1"
 UserParameter=rabbitmq.discovery_queues,powershell -File "c:\Scripts\rabbitmq_stat.ps1" queues
