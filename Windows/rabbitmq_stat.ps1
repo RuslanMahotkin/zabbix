@@ -71,19 +71,21 @@ if( $args[0] -and $args[0] -eq 'queues' ){
  }
 
  # Обработка списка очередей
- foreach($Queue in $QueuesStr.name.Split('`n')){
-  # Строка запроса статистики очереди
-  $QueueQueryStr = 'queues/%2f/' + $Queue + '?columns=message_stats,memory,messages,messages_ready,messages_unacknowledged,consumers'
+ if($QueuesStr){
+  foreach($Queue in $QueuesStr.name.Split('`n')){
+   # Строка запроса статистики очереди
+   $QueueQueryStr = 'queues/%2f/' + $Queue + '?columns=message_stats,memory,messages,messages_ready,messages_unacknowledged,consumers'
    # Статистика очереди
-  $QueueStat = RabbitMQAPI "$QueueQueryStr"
-  # Обработка требуемых параметров статистики очереди
-  foreach($ParName in 'consumers', 'memory', 'messages', 'messages_unacknowledged', 'messages_ready'){
-   # Значение параметра
-   $ParValue = $QueueStat.$ParName
-   # Параметр не определен - инициализация нулевым значением
-   if($ParValue -eq $null){ $ParValue = 0 }
-   # Вывод имени и значения параметра в формате zabbix_sender
-   $OutStr += '- rabbitmq.' + $ParName + '[' + $Queue + '] ' + $ParValue + "`n"
+   $QueueStat = RabbitMQAPI "$QueueQueryStr"
+   # Обработка требуемых параметров статистики очереди
+   foreach($ParName in 'consumers', 'memory', 'messages', 'messages_unacknowledged', 'messages_ready'){
+    # Значение параметра
+    $ParValue = $QueueStat.$ParName
+    # Параметр не определен - инициализация нулевым значением
+    if($ParValue -eq $null){ $ParValue = 0 }
+    # Вывод имени и значения параметра в формате zabbix_sender
+    $OutStr += '- rabbitmq.' + $ParName + '[' + $Queue + '] ' + $ParValue + "`n"
+   }
   }
  }
 
