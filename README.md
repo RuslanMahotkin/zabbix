@@ -17,12 +17,12 @@
 - Apache 2.2.15;
 - Asterisk 11.15;
 - Elasticsearch 1.7.1;
-- Mongodb 3.0.6;
-- MySQL 5.6.26;
-- Nginx 1.8.0;
+- Mongodb 3.2.4;
+- MySQL 5.6.29;
+- Nginx 1.8.1;
 - Oracle 10g;
-- PHP-FPM 5.6.14;
-- RabbitMQ 3.5.6;
+- PHP-FPM 5.6.20;
+- RabbitMQ 3.6.1(erlang 18.3);
 - Sphinx 2.2.10.
 
 Общее описание работы сценария:
@@ -506,9 +506,32 @@ chown .zabbix /etc/zabbix/{JSON.sh,rabbitmq_stat.sh}
 ```
 установить свои значения 'Пользователь_мониторинга' и 'Пароль_мониторинга'.
 
-Примечание: в сценарии доступ к статистике по протоколу https, на http можно
-исправить в подстроке `https://127.0.0.1:15672/api/$1`.
-
+Примечание: в сценарии доступ к статистике по протоколу https, который настроен
+в /etc/rabbitmq/rabbitmq.config в разделе rabbit
+```
+  %% Настройки SSL
+  {ssl_options, [
+   %% Полное имя файла сертификата центра сертификации в формате PEM
+   {cacertfile,			"/etc/pki/tls/certs/Файл_сертификата_CA.pem"},
+   %% Полное имя файла сертификата в формате PEM
+   {certfile,			"/etc/pki/tls/certs/Файл_сертификата.pem"},
+   %% Полное имя файла закрытого ключа в формате PEM
+   {keyfile,			"/etc/pki/tls/private/Файл_ключа.pem"},
+   %% Используемые версии SSL
+   {versions,			['tlsv1.2']},
+   %% Используемые наборы шифров
+   {ciphers,			[{ecdhe_rsa,aes_128_gcm,null,sha256}]},
+   %% Проверка сертификата клиента
+   {verify,			verify_peer},
+   %% Запрет клиента без сертификата
+   {fail_if_no_peer_cert,	false}
+  ]},
+```
+Для  http-доступа к статистике исправить протокол и убрать параметры
+'ciphers', 'insecure' и 'tlsv1.2' в строке
+```
+ RespStr=$(/usr/bin/curl --max-time 20 --no-keepalive --silent --ciphers ecdhe_rsa_aes_128_gcm_sha_256 --insecure --tlsv1.2 --user Пользователь_мониторинга:Пароль_мониторинга "https://127.0.0.1:15672/api/$1" | /etc/zabbix/JSON.sh -l 2>/dev/null)
+```
 
 /etc/rabbitmq/enabled_plugins - добавить плагин управления rabbitmq_management
 ```
@@ -652,7 +675,7 @@ UserParameter=postgresql.discovery_databases,powershell -File "c:\Scripts\postgr
 
 ## RabbitMQ, шаблон mytemplate-rabbitmq-trap.xml
 
-Предполагается Erlang otp_win64_18.1.exe.
+Предполагается Erlang otp_win64_18.3.exe.
 
 В файле enabled_plugins - добавить плагин управления rabbitmq_management
 ```
@@ -661,8 +684,8 @@ UserParameter=postgresql.discovery_databases,powershell -File "c:\Scripts\postgr
 
 Пользователь мониторинга
 ```
-SET ERLANG_HOME="C:\Program Files\erl7.1"
-cd "C:\Program Files (x86)\RabbitMQ Server\rabbitmq_server-3.5.6\sbin"
+SET ERLANG_HOME=C:\Program Files\erl7.3
+cd "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.6.1\sbin"
 rabbitmqctl add_user Пользователь_мониторинга Пароль_мониторинга
 rabbitmqctl set_user_tags Пользователь_мониторинга monitoring
 rabbitmqctl set_permissions Пользователь_мониторинга '' '' ''
@@ -681,9 +704,36 @@ rabbitmqctl set_permissions Пользователь_мониторинга '' '
 - в строке запуска `zabbix_sender` параметр `host` установить в DNS-имя сервера.
 
 
-Примечание: в сценарии доступ к статистике по протоколу https, на http можно
-исправить в строке `$uri = New-Object System.Uri("https://127.0.0.1:15672/api/$Query");`
+Примечание: в сценарии доступ к статистике по протоколу https, который настроен
+в rabbitmq.config в разделе rabbit
+```
+  %% Настройки SSL
+  {ssl_options, [
+   %% Полное имя файла сертификата центра сертификации в формате PEM
+   {cacertfile,			"Файл_сертификата_CA.pem"},
+   %% Полное имя файла сертификата в формате PEM
+   {certfile,			"Файл_сертификата.pem"},
+   %% Полное имя файла закрытого ключа в формате PEM
+   {keyfile,			"Файл_ключа.pem"},
+   %% Используемые версии SSL
+   {versions,			['tlsv1.1']},
+   %% Проверка сертификата клиента
+   {verify,			verify_peer},
+   %% Запрет клиента без сертификата
+   {fail_if_no_peer_cert,	false}
 
+  ]},
+```
+Для  http-доступа к статистике исправить протокол в строке
+```
+ $uri = New-Object System.Uri("https://127.0.0.1:15672/api/$Query");
+```
+и удалить строки
+```
+[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11
+
+```
 
 C:\Scripts\zabbix_agentd_win.conf - подключение сценария к zabbix-агенту
 ```

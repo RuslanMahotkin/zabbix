@@ -8,9 +8,11 @@ CurlAPI(){
  #  --max-time		максимальное время операции в секундах;
  #  --no-keepalive	отключение keepalive-сообщений в TCP-соединении;
  #  --silent		отключение индикаторов загрузки и сообщений об ошибках;
+ #  --ciphers		список используемых наборов шифров;
  #  --insecure		отключение проверки сертификата HTTPS-сервера;
+ #  --tlsv1.2		использование TLSv1.2;
  #  --user		'пользователь:пароль' аутентификации на сервере
- RespStr=$(/usr/bin/curl --max-time 20 --no-keepalive --silent --insecure --user Пользователь_мониторинга:Пароль_мониторинга "https://127.0.0.1:15672/api/$1" | /etc/zabbix/JSON.sh -l 2>/dev/null)
+ RespStr=$(/usr/bin/curl --max-time 20 --no-keepalive --silent --ciphers ecdhe_rsa_aes_128_gcm_sha_256 --insecure --tlsv1.2 --user Пользователь_мониторинга:Пароль_мониторинга "https://127.0.0.1:15672/api/$1" | /etc/zabbix/JSON.sh -l 2>/dev/null)
  # Статистика недоступна - возврат статуса сервиса - 'не работает'
  [ $? != 0 ] && echo 0 && exit 1
 }

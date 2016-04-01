@@ -28,6 +28,8 @@ function RabbitMQAPI($Query){
 $OutputEncoding = [Console]::OutputEncoding
 # Отключение проверки сертификата сервера
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+# Список используемых протоколов
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls11
 # Вебклиент для получения данных идентифицируемых по URI ресурсов
 $wc = New-Object System.Net.WebClient
 # Данные аутентификации
