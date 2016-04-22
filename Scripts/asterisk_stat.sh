@@ -14,8 +14,8 @@ aComAwk=(
  'core show channels' '/active channels/ { print "channels.active", int($1) } /active calls/ { print "calls.active", int($1) } /calls processed/ { print "calls.processed", int($1) }'
  'xmpp show connections' '/Number of clients:/ { print "xmpp.connections", int($NF) }'
  'sip show subscriptions' '/active SIP subscriptions/ { print "sip.subscriptions", int($1) }'
- 'sip show registry' '/SIP registrations/ { print "sip.registrations", int($1) } /Registered/ { r += 1 } END { print "sip.registered", r }'
- 'iax2 show registry' '/IAX2 registrations/ { print "iax2.registrations", int($1) } /Registered/ { r += 1 } END { print "iax2.registered", r }'
+ 'sip show registry' '/SIP registrations/ { print "sip.registrations", int($1) } /Registered/ { r += 1 } END { print "sip.registered", int(r) }'
+ 'iax2 show registry' '/IAX2 registrations/ { print "iax2.registrations", int($1) } /Registered/ { r += 1 } END { print "iax2.registered", int(r) }'
 )
 
 # Формирование строки команд Asterisk из строк команд массива
