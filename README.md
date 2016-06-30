@@ -17,12 +17,13 @@
 - Apache 2.2.15;
 - Asterisk 11.15;
 - Elasticsearch 1.7.1;
-- Mongodb 3.2.4;
-- MySQL 5.6.29;
-- Nginx 1.8.1;
+- Mongodb 3.2.7;
+- MySQL 5.7.12;
+- Nginx 1.10.1;
 - Oracle 10g;
-- PHP-FPM 5.6.20;
-- RabbitMQ 3.6.1(erlang 18.3);
+- PHP-FPM 5.6.23;
+- RabbitMQ 3.6.2(erlang 19.0);
+- Redis 3.2.1;
 - Sphinx 2.2.10.
 
 Общее описание работы сценария:
@@ -556,6 +557,31 @@ UserParameter		= rabbitmq.discovery_queues,/etc/zabbix/rabbitmq_stat.sh queues
 service zabbix-agent restart
 ```
 
+## Redis, шаблон mytemplate-redis-trap.xml
+
+Сценарий отправки статистики сервера Redis на сервер Zabbix
+```
+chmod 750 /etc/zabbix/redis_stat.sh
+chown .zabbix /etc/zabbix/redis_stat.sh
+```
+
+В сценарии в подстроке
+```
+... -s /полное/имя/файла/сокета ...
+```
+установить '/полное/имя/файла/сокета'.
+
+/etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
+```
+UserParameter		= redis_status,/etc/zabbix/redis_stat.sh
+UserParameter		= redis.discovery_db,/etc/zabbix/redis_stat.sh db
+```
+
+Перезапуск агента
+```
+service zabbix-agent restart
+```
+
 ## Sphinx, шаблон mytemplate-sphinx-trap.xml
 
 /etc/sphinx/sphinx.conf - локальное MySQL-соединение в разделе searchd
@@ -675,7 +701,7 @@ UserParameter=postgresql.discovery_databases,powershell -File "c:\Scripts\postgr
 
 ## RabbitMQ, шаблон mytemplate-rabbitmq-trap.xml
 
-Предполагается Erlang otp_win64_18.3.exe.
+Предполагается Erlang otp_win64_19.0.exe.
 
 В файле enabled_plugins - добавить плагин управления rabbitmq_management
 ```
@@ -684,8 +710,8 @@ UserParameter=postgresql.discovery_databases,powershell -File "c:\Scripts\postgr
 
 Пользователь мониторинга
 ```
-SET ERLANG_HOME=C:\Program Files\erl7.3
-cd "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.6.1\sbin"
+SET ERLANG_HOME=C:\Program Files\erl8.0
+cd "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.6.2\sbin"
 rabbitmqctl add_user Пользователь_мониторинга Пароль_мониторинга
 rabbitmqctl set_user_tags Пользователь_мониторинга monitoring
 rabbitmqctl set_permissions Пользователь_мониторинга '' '' ''
