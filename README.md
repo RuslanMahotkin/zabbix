@@ -17,14 +17,14 @@
 - Apache 2.2.15;
 - Asterisk 11.15;
 - Elasticsearch 1.7.1;
-- Mongodb 3.2.7;
-- MySQL 5.7.12;
+- Mongodb 3.2.8;
+- MySQL 5.7.13;
 - Nginx 1.10.1;
 - Oracle 10g;
-- PHP-FPM 5.6.23;
+- PHP-FPM 5.6.24;
 - RabbitMQ 3.6.2(erlang 19.0);
 - Redis 3.2.1;
-- Sphinx 2.2.10.
+- Sphinx 2.2.11.
 
 Общее описание работы сценария:
 
@@ -605,6 +605,20 @@ UserParameter		= sphinx.discovery_indexes,/etc/zabbix/sphinx_stat.sh indexes
 ```
 service searchd restart; service zabbix-agent restart
 ```
+
+# Linux (CentOS 7.X)
+
+Сценарии и их установка аналогична CentOS 6.X с небольшими изменениями:
+
+- Включение, перезапуск и перегрузка сервисов выполняется посредством systemd.
+Например, перезапуск агента
+```
+systemctl restart zabbix-agent.service
+
+```
+
+- Отличается сценарий "дисковый ввод/вывод" - io_stat.sh - расположен в
+ подкаталоге Scripts/CentOS7
 
 # Windows (Server 2012R2)
 
