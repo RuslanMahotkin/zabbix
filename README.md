@@ -17,12 +17,12 @@
 - Apache 2.2.15;
 - Asterisk 11.15;
 - Elasticsearch 1.7.1;
-- Mongodb 3.2.8;
-- MySQL 5.7.13;
+- Mongodb 3.2.9;
+- MySQL 5.7.14;
 - Nginx 1.10.1;
 - Oracle 10g;
-- PHP-FPM 5.6.24;
-- RabbitMQ 3.6.2(erlang 19.0);
+- PHP-FPM 5.6.26;
+- RabbitMQ 3.6.5(erlang 19.0.7);
 - Redis 3.2.1;
 - Sphinx 2.2.11.
 
@@ -725,7 +725,7 @@ UserParameter=postgresql.discovery_databases,powershell -File "c:\Scripts\postgr
 Пользователь мониторинга
 ```
 SET ERLANG_HOME=C:\Program Files\erl8.0
-cd "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.6.2\sbin"
+cd "C:\Program Files\RabbitMQ Server\rabbitmq_server-3.6.5\sbin"
 rabbitmqctl add_user Пользователь_мониторинга Пароль_мониторинга
 rabbitmqctl set_user_tags Пользователь_мониторинга monitoring
 rabbitmqctl set_permissions Пользователь_мониторинга '' '' ''
