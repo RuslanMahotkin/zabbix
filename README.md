@@ -15,15 +15,15 @@
 
 Версии сервисов:
 - Apache 2.2.15;
-- Asterisk 11.15;
+- Asterisk 13.11;
 - Elasticsearch 1.7.1;
-- Mongodb 3.2.9;
+- Mongodb 3.2.10;
 - MySQL 5.7.14;
 - Nginx 1.10.1;
 - Oracle 10g;
-- PHP-FPM 5.6.26;
-- RabbitMQ 3.6.5(erlang 19.0.7);
-- Redis 3.2.1;
+- PHP-FPM 5.6.27;
+- RabbitMQ 3.6.5(erlang 19.1);
+- Redis 3.2.4;
 - Sphinx 2.2.11.
 
 Общее описание работы сценария:

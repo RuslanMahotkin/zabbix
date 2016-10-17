@@ -6,7 +6,7 @@
 aComAwk=(
  'core show uptime seconds' '/System uptime:/ { print "uptime", int($3) }'
  'core show threads' '/threads listed/ { print "threads", int($1) }'
- 'voicemail show users' '/voicemail users configured/ { print "voicemail.users", int($1) } /^default/ { m += int($NF) } END { print "voicemail.messages", m }'
+ 'voicemail show users' '/voicemail users configured/ { print "voicemail.users", int($1) } BEGIN { m = 0 } /^default/ { m += int($NF) } END { print "voicemail.messages", m }'
  'sip show channels' '/active SIP/ { print "sip.channels.active", int($1) }'
  'iax2 show channels' '/active IAX/ { print "iax2.channels.active", int($1) }'
  'sip show peers' '/sip peers/ { print "sip.peers", int($1); print "sip.peers.online", int($5) + int($10) }'
@@ -14,8 +14,8 @@ aComAwk=(
  'core show channels' '/active channels/ { print "channels.active", int($1) } /active calls/ { print "calls.active", int($1) } /calls processed/ { print "calls.processed", int($1) }'
  'xmpp show connections' '/Number of clients:/ { print "xmpp.connections", int($NF) }'
  'sip show subscriptions' '/active SIP subscriptions/ { print "sip.subscriptions", int($1) }'
- 'sip show registry' '/SIP registrations/ { print "sip.registrations", int($1) } /Registered/ { r += 1 } END { print "sip.registered", int(r) }'
- 'iax2 show registry' '/IAX2 registrations/ { print "iax2.registrations", int($1) } /Registered/ { r += 1 } END { print "iax2.registered", int(r) }'
+ 'sip show registry' '/SIP registrations/ { print "sip.registrations", int($1) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "sip.registered", int(r) }'
+ 'iax2 show registry' '/IAX2 registrations/ { print "iax2.registrations", int($1) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "iax2.registered", int(r) }'
 )
 
 # Формирование строки команд Asterisk из строк команд массива
