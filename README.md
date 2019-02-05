@@ -15,15 +15,15 @@
 
 Версии сервисов:
 - Apache 2.2.15;
-- Asterisk 13.11;
+- Asterisk 16.1;
 - Elasticsearch 1.7.1;
-- Mongodb 3.4.0;
-- MySQL 5.7.16;
-- Nginx 1.10.2;
+- Mongodb 4.0.6;
+- MySQL 8.0.13;
+- Nginx 1.14.2;
 - Oracle 10g;
-- PHP-FPM 5.6.29;
+- PHP-FPM 7.3.1;
 - RabbitMQ 3.6.6(erlang 19.2);
-- Redis 3.2.6;
+- Redis 5.0.3;
 - Sphinx 2.2.11.
 
 Общее описание работы сценария:
@@ -140,7 +140,7 @@ service nginx reload; service httpd restart; service zabbix-agent restart
 
 ## Asterisk, шаблон mytemplate-asterisk-trap.xml
 
-Установить утилиту Netcat - пакет nc.
+Установить утилиту Netcat - пакет nc(в CentOS 7 - nmap-ncat).
 
 В файле настройки модуля AMI и сценарии в подстроке
 ```
@@ -168,7 +168,7 @@ write = command,reporting
 
 Перезапустить модуль AMI
 ```
-asterisk -rvvvvvv
+asterisk -r
  manager reload
 ```
 

@@ -4,18 +4,18 @@
 # Массив пар строк команда Asterisk  - строка awk-программы для обработки строки
 # ответа команды
 aComAwk=(
- 'core show uptime seconds' '/System uptime:/ { print "uptime", int($4) }'
- 'core show threads' '/threads listed/ { print "threads", int($2) }'
- 'voicemail show users' '/voicemail users configured/ { print "voicemail.users", int($2) } BEGIN { m = 0 } /^default/ { m += int($NF) } END { print "voicemail.messages", m }'
- 'sip show channels' '/active SIP/ { print "sip.channels.active", int($2) }'
- 'iax2 show channels' '/active IAX/ { print "iax2.channels.active", int($2) }'
- 'sip show peers' '/sip peers/ { print "sip.peers", int($2); print "sip.peers.online", int($6) + int($11) }'
- 'iax2 show peers' '/iax2 peers/ { print "iax2.peers", int($2) }'
- 'core show channels' '/active channels/ { print "channels.active", int($2) } /active calls/ { print "calls.active", int($2) } /calls processed/ { print "calls.processed", int($2) }'
+ 'core show uptime seconds' '/System uptime:/ { print "uptime", int($3) }'
+ 'core show threads' '/threads listed/ { print "threads", int($1) }'
+ 'voicemail show users' '/voicemail users configured/ { print "voicemail.users", int($1) } BEGIN { m = 0 } /^default/ { m += int($NF) } END { print "voicemail.messages", m }'
+ 'sip show channels' '/active SIP/ { print "sip.channels.active", int($1) }'
+ 'iax2 show channels' '/active IAX/ { print "iax2.channels.active", int($1) }'
+ 'sip show peers' '/sip peers/ { print "sip.peers", int($1); print "sip.peers.online", int($5) + int($10) }'
+ 'iax2 show peers' '/iax2 peers/ { print "iax2.peers", int($1) }'
+ 'core show channels' '/active channels/ { print "channels.active", int($1) } /active calls/ { print "calls.active", int($1) } /calls processed/ { print "calls.processed", int($1) }'
  'xmpp show connections' '/Number of clients:/ { print "xmpp.connections", int($NF) }'
- 'sip show subscriptions' '/active SIP subscriptions/ { print "sip.subscriptions", int($2) }'
- 'sip show registry' '/SIP registrations/ { print "sip.registrations", int($2) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "sip.registered", int(r) }'
- 'iax2 show registry' '/IAX2 registrations/ { print "iax2.registrations", int($2) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "iax2.registered", int(r) }'
+ 'sip show subscriptions' '/active SIP subscriptions/ { print "sip.subscriptions", int($1) }'
+ 'sip show registry' '/SIP registrations/ { print "sip.registrations", int($1) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "sip.registered", int(r) }'
+ 'iax2 show registry' '/IAX2 registrations/ { print "iax2.registrations", int($1) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "iax2.registered", int(r) }'
 )
 
 # Формирование строки команд Asterisk из строк команд массива
@@ -38,14 +38,12 @@ IFS=$'\n'
 OutStr=$(
  # Построчная обработка строки результатов выполнения команд
  for rs in $ResStr; do
-  # Позиция начала следующей строки в строке результатов
-  let "pos+=${#rs}+1"
-  # Строка сообщения вывода выполнения команды
-  if [ "${rs}" = "Message: Command output follows"$'\r' ]; then
+  # Строка начала подстроки результата выполнения команды
+  if [ "$rs" = "Response: Follows"$'\r' ]; then
    # Сохранение позиции начала подстроки результата в строке результатов
    begin=$pos
   # Строка конца подстроки результата выполнения команды
-  elif [[ "${rs:0:7}" != 'Output:' && -n "$begin" ]]; then
+  elif [ "$rs" = '--END COMMAND--'$'\r' ]; then
    # Выполнение awk-программы над подстрокой результата выполнения команды
    (cat <<EOF
 ${ResStr:$begin:$pos-$begin}
@@ -53,9 +51,9 @@ EOF
    ) | awk "${aComAwk[iAwk]}"
    # Переключение индекса строки awk-программы в массиве на следующую
    let "iAwk+=2"
-   # Очистка позиции начала подстроки результата в строке результатов
-   begin=
   fi
+  # Позиция начала следующей строки в строке результатов
+  let "pos+=${#rs}+1"
  # Вставка в начало каждой строки
  done | awk '{ print "- asterisk."$0 }'
 )
