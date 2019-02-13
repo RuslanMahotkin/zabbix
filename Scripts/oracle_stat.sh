@@ -74,6 +74,7 @@ else
  # SQL-подстроки получения значения статистики
  ValueSysStatStr=" to_char(value, '$fmint') FROM v\$sysstat WHERE name = "
  TimeWaitedSystemEventStr=" to_char(time_waited, '$fmint') FROM v\$system_event se, v\$event_name en WHERE se.event(+) = en.name AND en.name = "
+ ValueResourceLimitStr=" '$fmint') FROM v\$resource_limit WHERE resource_name = "
  # Массив SQL-запросов значений элементов данных
  aParSql=(
 "'checkactive', to_char(case when inst_cnt > 0 then 1 else 0 end,'$fmint')
@@ -124,6 +125,11 @@ else
 "'lastapplarclog', to_char(max(lh.SEQUENCE#), '$fmint')
   FROM  v\$loghist lh, v\$archived_log al
   WHERE lh.SEQUENCE# = al.SEQUENCE# AND applied='YES'"
+
+"'processescurrent', to_char(current_utilization,$ValueResourceLimitStr'processes'"
+"'sessionscurrent', to_char(current_utilization,$ValueResourceLimitStr'sessions'"
+"'processeslimit', to_char(limit_value,$ValueResourceLimitStr'processes'"
+"'sessionslimit', to_char(limit_value,$ValueResourceLimitStr'sessions'"
 
 "'commits',$ValueSysStatStr'user commits'"
 "'rollbacks',$ValueSysStatStr'user rollbacks'"

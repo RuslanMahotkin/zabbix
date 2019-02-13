@@ -1486,6 +1486,38 @@
                             <dependencies/>
                             <tags/>
                         </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{MyTemplate Oracle Trap:oracle.processescurrent[{#DBNAME}].last(0)}&gt;({MyTemplate Oracle Trap:oracle.processeslimit[{#DBNAME}].last(0)}*0.9)</expression>
+                            <recovery_mode>0</recovery_mode>
+                            <recovery_expression/>
+                            <name>Oracle: Instance {#DBNAME} on {HOSTNAME} 90% processes used</name>
+                            <correlation_mode>0</correlation_mode>
+                            <correlation_tag/>
+                            <url/>
+                            <status>0</status>
+                            <priority>4</priority>
+                            <description/>
+                            <type>0</type>
+                            <manual_close>0</manual_close>
+                            <dependencies/>
+                            <tags/>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{MyTemplate Oracle Trap:oracle.sessionscurrent[{#DBNAME}].last(0)}&gt;({MyTemplate Oracle Trap:oracle.sessionslimit[{#DBNAME}].last(0)}*0.9)</expression>
+                            <recovery_mode>0</recovery_mode>
+                            <recovery_expression/>
+                            <name>Oracle: Instance {#DBNAME} on {HOSTNAME} 90% sessions used</name>
+                            <correlation_mode>0</correlation_mode>
+                            <correlation_tag/>
+                            <url/>
+                            <status>0</status>
+                            <priority>4</priority>
+                            <description/>
+                            <type>0</type>
+                            <manual_close>0</manual_close>
+                            <dependencies/>
+                            <tags/>
+                        </trigger_prototype>
                     </trigger_prototypes>
                     <graph_prototypes/>
                     <host_prototypes/>

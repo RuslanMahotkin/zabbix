@@ -413,6 +413,7 @@ su - oracle
   GRANT SELECT ON v_$system_event TO Пользователь_мониторинга;
   GRANT SELECT ON v_$event_name   TO Пользователь_мониторинга;
   GRANT SELECT ON v_$sort_segment TO Пользователь_мониторинга;
+  GRANT SELECT ON v_$resource_limit TO Пользователь_мониторинга;
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
