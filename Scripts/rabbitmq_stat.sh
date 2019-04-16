@@ -2,7 +2,7 @@
 # Отправка статистики сервера RabbitMQ на сервер Zabbix
 
 CurlAPI(){
-# Запрос к API PabbitMQ
+# Запрос к API RabbitMQ
 
  # Параметры curl:
  #  --max-time		максимальное время операции в секундах;
