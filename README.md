@@ -168,8 +168,7 @@ write = command,reporting
 
 Перезапустить модуль AMI
 ```
-asterisk -r
- manager reload
+asterisk -rx 'manager reload'
 ```
 
 Сценарий отправки статистики сервера Asterisk на сервер Zabbix
