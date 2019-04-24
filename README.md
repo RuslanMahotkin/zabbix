@@ -15,15 +15,15 @@
 
 Версии сервисов:
 - Apache 2.2.15;
-- Asterisk 16.1;
+- Asterisk 16.3;
 - Elasticsearch 1.7.1;
-- Mongodb 4.0.6;
-- MySQL 8.0.13;
-- Nginx 1.14.2;
+- Mongodb 4.0.9;
+- MySQL 8.0.15;
+- Nginx 1.16.0;
 - Oracle 10g;
-- PHP-FPM 7.3.1;
+- PHP-FPM 7.3.4;
 - RabbitMQ 3.6.6(erlang 19.2);
-- Redis 5.0.3;
+- Redis 5.0.4;
 - Sphinx 2.2.11.
 
 Общее описание работы сценария:
@@ -49,7 +49,7 @@
 - Запуск агента при старте системы и права на каталог/файл конфигурации:
 ```
  chmod 700 /etc/rc.d/init.d/zabbix-agent; chkconfig zabbix-agent on
- chmod 2750 /etc/zabbix; chown -R .zabbix /etc/zabbix
+ chmod 2750 /etc/zabbix; chgrp -R zabbix /etc/zabbix
  chmod 640 /etc/zabbix/zabbix_agentd.conf
 ```
 
@@ -88,7 +88,7 @@
 Сценарий отправки статистики сервера Apache на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/apache_stat.sh
-chown .zabbix /etc/zabbix/apache_stat.sh
+chgrp zabbix /etc/zabbix/apache_stat.sh
 ```
 
 /etc/nginx/nginx.conf - добавить в сервер мониторинга (описан в разделе nginx)
@@ -168,14 +168,13 @@ write = command,reporting
 
 Перезапустить модуль AMI
 ```
-asterisk -r
- manager reload
+asterisk -rx 'manager reload'
 ```
 
 Сценарий отправки статистики сервера Asterisk на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/asterisk_stat.sh
-chown .zabbix /etc/zabbix/asterisk_stat.sh
+chgrp zabbix /etc/zabbix/asterisk_stat.sh
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
@@ -194,7 +193,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера Elasticsearch на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/{elasticsearch_stat.sh,JSON.sh}
-chown .zabbix /etc/zabbix/{elasticsearch_stat.sh,JSON.sh}
+chgrp zabbix /etc/zabbix/{elasticsearch_stat.sh,JSON.sh}
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
@@ -220,7 +219,7 @@ rm -f /etc/cron.d/sysstat
 Сценарий отправки статистики дискового ввода-вывода на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/io_stat.sh
-chown .zabbix /etc/zabbix/io_stat.sh
+chgrp zabbix /etc/zabbix/io_stat.sh
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
@@ -239,7 +238,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера MongoDB на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/{JSON.sh,mongodb_stat.sh}
-chown .zabbix /etc/zabbix/{JSON.sh,mongodb_stat.sh}
+chgrp zabbix /etc/zabbix/{JSON.sh,mongodb_stat.sh}
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
@@ -265,7 +264,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера MySQL на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/mysql_stat.sh
-chown .zabbix /etc/zabbix/mysql_stat.sh
+chgrp zabbix /etc/zabbix/mysql_stat.sh
 ```
 
 Mysql-пользователь мониторинга
@@ -291,7 +290,7 @@ service zabbix-agent restart
 Сценарий отправки статистики репликации сервера MySQL на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/mysql_slave_stat.sh
-chown .zabbix /etc/zabbix/mysql_slave_stat.sh
+chgrp zabbix /etc/zabbix/mysql_slave_stat.sh
 ```
 
 Привилегия клиента репликации Mysql-пользователю мониторинга
@@ -317,7 +316,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера Nginx на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/nginx_stat.sh
-chown .zabbix /etc/zabbix/nginx_stat.sh
+chgrp zabbix /etc/zabbix/nginx_stat.sh
 ```
 
 В `httpd.conf` установить параметры:
@@ -368,7 +367,7 @@ service nginx reload; service zabbix-agent restart
 Сценарий отправки статистики сервера Oracle на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/{oracle_stat.sh,oraenv}
-chown .zabbix /etc/zabbix/{oracle_stat.sh,oraenv}
+chgrp zabbix /etc/zabbix/{oracle_stat.sh,oraenv}
 ```
 
 Добавление пользователя, под которым запущен агент zabbix, в группу для доступа к SQL Plus
@@ -433,7 +432,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера Php-fpm на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/php-fpm_stat.sh
-chown .zabbix /etc/zabbix/php-fpm_stat.sh
+chgrp zabbix /etc/zabbix/php-fpm_stat.sh
 ```
 
 /etc/nginx/nginx.conf - добавить в сервер мониторинга (описан в разделе nginx)
@@ -474,7 +473,7 @@ service nginx reload; service php-fpm reload; service zabbix-agent restart
 Сценарий отправки статистики сервера Postfix на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/{logtail.pl,postfix_stat.sh}
-chown .zabbix /etc/zabbix/{logtail.pl,postfix_stat.sh}
+chgrp zabbix /etc/zabbix/{logtail.pl,postfix_stat.sh}
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту
@@ -499,7 +498,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера RabbitMQ на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/{JSON.sh,rabbitmq_stat.sh}
-chown .zabbix /etc/zabbix/{JSON.sh,rabbitmq_stat.sh}
+chgrp zabbix /etc/zabbix/{JSON.sh,rabbitmq_stat.sh}
 ```
 
 В сценарии в подстроке
@@ -563,7 +562,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера Redis на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/redis_stat.sh
-chown .zabbix /etc/zabbix/redis_stat.sh
+chgrp zabbix /etc/zabbix/redis_stat.sh
 ```
 
 В сценарии в подстроке
@@ -593,7 +592,7 @@ service zabbix-agent restart
 Сценарий отправки статистики сервера Sphinx на сервер Zabbix
 ```
 chmod 750 /etc/zabbix/sphinx_stat.sh
-chown .zabbix /etc/zabbix/sphinx_stat.sh
+chgrp zabbix /etc/zabbix/sphinx_stat.sh
 ```
 
 /etc/zabbix/zabbix_agentd.conf - подключение сценария к zabbix-агенту

@@ -2,9 +2,9 @@
 
 
 function RabbitMQAPI($Query){
-# Запрос к API PabbitMQ. Параметры: 1 - строка параметров запроса API
+# Запрос к API RabbitMQ. Параметры: 1 - строка параметров запроса API
 
- # Объект Uri API PabbitMQ
+ # Объект Uri API RabbitMQ
  $uri = New-Object System.Uri("https://127.0.0.1:15672/api/$Query");
 
  # Предотвращение преобразования '%2f' в символ '/'
