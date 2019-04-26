@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Отправка статистики сервера ElasticSearch на сервер Zabbix
 
 CurlAPI(){

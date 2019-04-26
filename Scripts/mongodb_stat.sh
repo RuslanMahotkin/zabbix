@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Отправка статистики сервера MongoDB на сервер Zabbix
 
 MongoAPI(){

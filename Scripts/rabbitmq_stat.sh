@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Отправка статистики сервера RabbitMQ на сервер Zabbix
 
 CurlAPI(){
