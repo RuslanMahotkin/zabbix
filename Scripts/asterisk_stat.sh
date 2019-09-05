@@ -16,6 +16,13 @@ aComAwk=(
  'sip show subscriptions' '/active SIP subscriptions/ { print "sip.subscriptions", int($2) }'
  'sip show registry' '/SIP registrations/ { print "sip.registrations", int($2) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "sip.registered", int(r) }'
  'iax2 show registry' '/IAX2 registrations/ { print "iax2.registrations", int($2) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "iax2.registered", int(r) }'
+ 'pjsip show aors' '/Objects found:/ { print "pjsip.aors.all", int($4) } BEGIN { r = 0 } /Avail/ { r += 1 } END { print "pjsip.aors.avail", int(r) }'
+ 'pjsip show auths' '/Objects found:/ { print "pjsip.auths", int($4) }'
+ 'pjsip show channels' '/Objects found:/ { print "pjsip.channels", int($4) }'
+ 'pjsip show contacts' '/Objects found:/ { print "pjsip.contacts.all", int($4) } BEGIN { r = 0 } /Avail/ { r += 1 } END { print "pjsip.contacts.avail", int(r) }'
+ 'pjsip show endpoints' '/Objects found:/ { print "pjsip.endpoints.all", int($4) } BEGIN { r = 0 } /Avail/ { r += 1 } END { print "pjsip.endpoints.avail", int(r) }'
+ 'pjsip show identifies' '/Objects found:/ { print "pjsip.identifies", int($4) }'
+ 'pjsip show registrations' '/Objects found:/ { print "pjsip.registrations", int($4) } BEGIN { r = 0 } /Registered/ { r += 1 } END { print "pjsip.registered", int(r) }'
 )
 
 # Формирование строки команд Asterisk из строк команд массива
